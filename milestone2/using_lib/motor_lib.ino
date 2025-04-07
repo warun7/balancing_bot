@@ -5,7 +5,7 @@ const int stepPin = 3;
 const int dirPin = 2;
 
 // Motor setup (200 steps/rev × 32 microsteps = 6400 steps/rev)
-const int stepsPerRevolution = 6400; 
+const int stepsPerRevolution = 6400;
 AccelStepper stepper(1, stepPin, dirPin); // Type 1 = Driver interface
 
 void setup() {

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 
 # Configure serial connection (update COM port as needed)
-PORT = 'COM5'  # Change this to your Arduino port
+PORT = 'COM5'
 BAUD_RATE = 115200
 
 def read_serial_data(duration_seconds=10):
@@ -23,10 +23,9 @@ def read_serial_data(duration_seconds=10):
         print(f"Error opening serial port: {e}")
         return None
 
-    # Prepare data storage
     data = []
 
-    # Wait for Arduino to reset
+    # reset arduino buffer
     print("Waiting for Arduino to initialize...")
     ser.reset_input_buffer()
 
