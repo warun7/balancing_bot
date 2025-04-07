@@ -1,7 +1,6 @@
-// Pin definitions
-const int dirPin = 2;    // Direction pin
-const int stepPin = 3;   // Step pin
-const int stepsPerRev = 6400; // 200 steps * 32 microsteps
+const int dirPin = 2;
+const int stepPin = 3;   
+const int stepsPerRev = 6400; 
 
 void setup() {
   pinMode(dirPin, OUTPUT);
@@ -18,7 +17,6 @@ void loop() {
     dir.trim();
     dir.toUpperCase();
 
-    // Validate input
     if (angle <= 0 || angle > 3600) {
       Serial.println("Error: Angle must be 0.1° to 3600°");
       return;
