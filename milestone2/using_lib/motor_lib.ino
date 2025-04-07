@@ -1,17 +1,16 @@
 #include <AccelStepper.h>
 
-// Pins
 const int stepPin = 3;
 const int dirPin = 2;
 
 // Motor setup (200 steps/rev × 32 microsteps = 6400 steps/rev)
 const int stepsPerRevolution = 6400; 
-AccelStepper stepper(1, stepPin, dirPin); // Type 1 = Driver interface
+AccelStepper stepper(1, stepPin, dirPin); 
 
 void setup() {
   Serial.begin(9600);
   stepper.setMaxSpeed(1000);     // 1000 steps/sec (~9.4 RPM)
-  stepper.setAcceleration(800);  // 800 steps/sec²
+  stepper.setAcceleration(800);  // 800 steps/sec^2
   Serial.println("Enter degrees and direction (e.g., '90 CW'):");
 }
 
@@ -32,15 +31,12 @@ void loop() {
       return;
     }
 
-    // Calculate target position
     long target = degrees * stepsPerRevolution / 360;
-    if (dir == "CCW") target = -target; // Negative for counter-clockwise
+    if (dir == "CCW") target = -target;
     
-    stepper.move(target); // Queue the movement
+    stepper.move(target); 
     
-    // Run the motor until it reaches target
     while (stepper.run()) { 
-      // The library handles acceleration and stepping automatically
     }
     
     Serial.println("Done!");
