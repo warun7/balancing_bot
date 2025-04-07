@@ -1,28 +1,33 @@
 const int dirPin = 2;
-const int stepPin = 3;   
-const int stepsPerRev = 6400; 
+const int stepPin = 3;
+const int stepsPerRev = 6400;
 
-void setup() {
+void setup()
+{
   pinMode(dirPin, OUTPUT);
   pinMode(stepPin, OUTPUT);
   Serial.begin(9600);
   Serial.println("Enter angle and direction (e.g., '90 CW'):");
 }
 
-void loop() {
-  if (Serial.available()) {
+void loop()
+{
+  if (Serial.available())
+  {
     // Read input
     float angle = Serial.parseFloat();
     String dir = Serial.readStringUntil('\n');
     dir.trim();
     dir.toUpperCase();
 
-    if (angle <= 0 || angle > 3600) {
+    if (angle <= 0 || angle > 3600)
+    {
       Serial.println("Error: Angle must be 0.1° to 3600°");
       return;
     }
 
-    if (dir != "CW" && dir != "CCW") {
+    if (dir != "CW" && dir != "CCW")
+    {
       Serial.println("Error: Use 'CW' or 'CCW' for direction");
       return;
     }
@@ -33,16 +38,17 @@ void loop() {
   }
 }
 
-void moveStepper(float degrees, String direction) {
+void moveStepper(float degrees, String direction)
+{
   int steps = degrees * stepsPerRev / 360;
   digitalWrite(dirPin, direction == "CW" ? HIGH : LOW);
 
-  for (int i = 0; i < steps; i++) {
+  for (int i = 0; i < steps; i++)
+  {
     digitalWrite(stepPin, HIGH);
     delayMicroseconds(100);
     digitalWrite(stepPin, LOW);
     delayMicroseconds(100);
-
   }
   Serial.println("Done");
 }
