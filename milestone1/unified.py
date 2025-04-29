@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 
-# Configure serial connection (update COM port as needed)
+# Configure serial connection
 PORT = 'COM5'
 BAUD_RATE = 115200
 
