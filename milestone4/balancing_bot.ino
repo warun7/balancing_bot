@@ -2,7 +2,7 @@
 #include <Wire.h>
 
 // PID variables
-double setpoint = 3;    // Target pitch (desired angle)
+double setpoint = 2;    // Target pitch (desired angle)
 double input, output;
 double Kp = 50.0, Ki = 0.2, Kd =  1;// PID constants
 double lastInput = 0;   // Previous input for derivative calculation
@@ -25,11 +25,11 @@ float gyroX_offset = 0, gyroY_offset = 0; // Gyro drift offsets
 #define stepPin1 7
 #define dirPin2 8
 #define stepPin2 9
-
+	
 #define motorInterfaceType 1
 
-#define STEPS_PER_REVOLUTION 800
-#define ANGLE 360
+//#define STEPS_PER_REVOLUTION 800
+//#define ANGLE 360
 
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
 AccelStepper stepper2 = AccelStepper(motorInterfaceType, stepPin2, dirPin2);
@@ -47,7 +47,7 @@ void setup() {
   Wire.endTransmission(true);
   
   calibrateGyro(); // Measure gyro drift
-  prevTime = micros(); // Initialize time tracking with micros
+  prevTime = millis(); // Initialize time tracking with millis
 
   stepper.setMaxSpeed(30000);
   stepper2.setMaxSpeed(30000);
@@ -56,48 +56,44 @@ void setup() {
 void loop() {
   readMPU6050();
   calculateAngles();
-  printAngles();  
+  printAngles();
 
-  // Use the pitch as the input to the PID controller
-  input = pitch;
+  // Apply deadband to pitch
+  float adjustedPitch = pitch;
+  if (pitch > -3 && pitch < 3) {
+    adjustedPitch = 0;
+  }
+
+  // Use the deadbanded pitch as the input to the PID controller
+  input = adjustedPitch;
 
   // PID control loop
   unsigned long currentTime = millis();
   if (currentTime - lastTime >= sampleTime) {
-    // Calculate PID
     double error = setpoint - input;
-    integral += error * (currentTime - lastTime) / 1000.0; // sum of errors (integral term)
-    double derivative = (input - lastInput) / (currentTime - lastTime); // rate of change (derivative term)
-    
-    // PID output calculation
+    integral += error * (currentTime - lastTime) / 1000.0;
+    double derivative = (input - lastInput) / (currentTime - lastTime);
+
     output = Kp * error + Ki * integral + Kd * derivative;
-
-    // Store current input for next derivative calculation
     lastInput = input;
-
-    // Update lastTime for next sample
     lastTime = currentTime;
   }
 
-  // Dynamically adjust speed based on pitch value
- if (pitch < 0) {
-  // Forward motion (negative pitch), speed range capped at -30000
-  stepper.setSpeed(map(pitch, -90, 0, -15000, -30000) + output);
-  stepper2.setSpeed(-(map(pitch, -90, 0, -15000, -30000) - output));
-} else {
-  // Backward motion (positive pitch), speed range capped at 30000
-  stepper.setSpeed(map(pitch, 0, 90, 15000, 30000) + output);
-  stepper2.setSpeed(-(map(pitch, 0, 90, 15000, 30000) - output));
-}
+  // Dynamically adjust speed based on adjusted pitch value
+  if (adjustedPitch < 0) {
+    stepper.setSpeed(map(adjustedPitch, -90, 0, -15000, -30000) + output);
+    stepper2.setSpeed(-(map(adjustedPitch, -90, 0, -15000, -30000) - output));
+  } else {
+    stepper.setSpeed(map(adjustedPitch, 0, 90, 15000, 30000) + output);
+    stepper2.setSpeed(-(map(adjustedPitch, 0, 90, 15000, 30000) - output));
+  }
 
-
-  // Run the motors
   stepper.runSpeed();
   stepper2.runSpeed();
 }
 
 void calibrateGyro() {
-    int numReadings = 500;
+    int numReadings = 1000;
     float sumX = 0, sumY = 0;
     for (int i = 0; i < numReadings; i++) {
         Wire.beginTransmission(MPU6050_ADDR);
@@ -135,8 +131,8 @@ void readMPU6050() {
 }
 
 void calculateAngles() {
-    unsigned long currentTime = micros();
-    float dt = (currentTime - prevTime) / 1000000.0; // Convert to seconds
+    unsigned long currentTime = millis();
+    float dt = (currentTime - prevTime) / 1000.0; // Convert to seconds
     prevTime = currentTime;
     
     // Calculate roll and pitch from accelerometer
